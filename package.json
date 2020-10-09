@@ -1,7 +1,7 @@
 {
   "name": "@ladjs/koa-better-static",
   "description": "Static file serving middleware for koa",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
   "ava": {
     "failFast": true,

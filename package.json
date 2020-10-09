@@ -8,7 +8,7 @@
     "verbose": true
   },
   "bugs": {
-    "url": "https://github.com/ladjs/shared-config/issues",
+    "url": "https://github.com/ladjs/koa-better-static/issues",
     "email": "niftylettuce@gmail.com"
   },
   "commitlint": {
@@ -49,7 +49,7 @@
     "index.js",
     "send.js"
   ],
-  "homepage": "https://github.com/ladjs/shared-config",
+  "homepage": "https://github.com/ladjs/koa-better-static",
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged && npm test",

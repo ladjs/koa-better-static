@@ -20,7 +20,7 @@
     "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)"
   ],
   "dependencies": {
-    "debug": "*",
+    "debug": "4.3.4",
     "resolve-path": "^1.4.0"
   },
   "devDependencies": {

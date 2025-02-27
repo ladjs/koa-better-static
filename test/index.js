@@ -6,7 +6,7 @@ const serve = require('..');
 
 // serve(root)
 // when root = "."
-test('should serve from cwd', async t => {
+test('should serve from cwd', async (t) => {
   const app = new Koa();
   app.use(serve('.'));
   const res = await request(app.listen()).get('/package.json');
@@ -14,7 +14,7 @@ test('should serve from cwd', async t => {
 });
 
 // when path is not a file
-test('should 404', async t => {
+test('should 404', async (t) => {
   const app = new Koa();
   app.use(serve('test/fixtures'));
   const res = await request(app.listen()).get('/something');
@@ -22,7 +22,7 @@ test('should 404', async t => {
 });
 
 // when upstream middleware responds
-test('should respond', async t => {
+test('should respond', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures'));
@@ -38,7 +38,7 @@ test('should respond', async t => {
 });
 
 // the path is valid
-test('should serve the file', async t => {
+test('should serve the file', async (t) => {
   const app = new Koa();
   app.use(serve('test/fixtures'));
   const res = await request(app.listen()).get('/hello.txt');
@@ -48,7 +48,7 @@ test('should serve the file', async t => {
 
 // .index
 // when present
-test('should alter the index file supported', async t => {
+test('should alter the index file supported', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures', { index: 'index.txt' }));
@@ -60,7 +60,7 @@ test('should alter the index file supported', async t => {
 });
 
 // when added
-test('should use index.html', async t => {
+test('should use index.html', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures', { index: 'index.html' }));
@@ -72,7 +72,7 @@ test('should use index.html', async t => {
 });
 
 // by default
-test('should not use index.html', async t => {
+test('should not use index.html', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures'));
@@ -82,7 +82,7 @@ test('should not use index.html', async t => {
 });
 
 // when method is not `GET` or `HEAD`
-test('when method is not GET or HEAD should 404', async t => {
+test('when method is not GET or HEAD should 404', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures'));
@@ -93,7 +93,7 @@ test('when method is not GET or HEAD should 404', async t => {
 
 // option - format'
 // when format: false'
-test('when format false should 404', async t => {
+test('when format false should 404', async (t) => {
   const app = new Koa();
 
   app.use(
@@ -107,7 +107,7 @@ test('when format false should 404', async t => {
   t.is(res.status, 404);
 });
 
-test('should 200', async t => {
+test('should 200', async (t) => {
   const app = new Koa();
 
   app.use(
@@ -122,7 +122,7 @@ test('should 200', async t => {
 });
 
 // when format: true
-test('when format true should 200', async t => {
+test('when format true should 200', async (t) => {
   const app = new Koa();
 
   app.use(
@@ -136,7 +136,7 @@ test('when format true should 200', async t => {
   t.is(res.status, 200);
 });
 
-test('when format true (directory) should 200', async t => {
+test('when format true (directory) should 200', async (t) => {
   const app = new Koa();
 
   app.use(
@@ -151,7 +151,7 @@ test('when format true (directory) should 200', async t => {
 });
 
 // Support if-modified-since
-test('should 304', async t => {
+test('should 304', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures'));
@@ -165,7 +165,7 @@ test('should 304', async t => {
   t.is(newRes.status, 304);
 });
 
-test('support if-modified-since should 200', async t => {
+test('support if-modified-since should 200', async (t) => {
   const app = new Koa();
 
   app.use(serve('test/fixtures'));
@@ -177,11 +177,11 @@ test('support if-modified-since should 200', async t => {
 });
 
 // Work with koa-mount
-test('should mount fine', async t => {
+test('should mount fine', async (t) => {
   const app = new Koa();
 
   app.use(
-    mount('/fixtures', serve(require('path').join(__dirname, '/fixtures')))
+    mount('/fixtures', serve(require('node:path').join(__dirname, '/fixtures')))
   );
 
   const res = await request(app.listen()).get('/fixtures/hello.txt');
@@ -190,7 +190,7 @@ test('should mount fine', async t => {
 
 // This is more of a test of js, than of the logic. But something we rely on
 // Dates should truncate not, round
-test('dates should truncate not round, should mount fine', t => {
+test('dates should truncate not round, should mount fine', (t) => {
   const str = new Date().toUTCString();
 
   let ms = Date.parse(str);

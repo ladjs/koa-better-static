@@ -1,31 +1,9 @@
-const { extname } = require('path');
-const fs = require('fs');
+const fs = require('node:fs');
+const { extname } = require('node:path');
+const mime = require('mime-types');
 const debug = require('debug')('@ladjs/koa-better-static:send');
 
 module.exports = send;
-
-/**
- * Send file at `path` with the
- * given `options` to the koa `ctx`.
- *
- * @param {Context} ctx
- * @param {String} root
- * @param {String} path
- * @param {Object} [opts]
- * @return {Function}
- * @api public
- */
-
-function stat(path) {
-  return new Promise((resolve, reject) => {
-    fs.stat(path, (err, data) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
 
 async function send(ctx, path, opts) {
   if (typeof ctx !== 'object') throw new Error('`ctx` is required');
@@ -39,12 +17,13 @@ async function send(ctx, path, opts) {
   // Stat
   let stats;
   try {
-    stats = await stat(path);
+    stats = await fs.promises.stat(path);
   } catch (err) {
     const notfound = ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'];
-    if (notfound.indexOf(err.code) !== -1) {
+    if (notfound.includes(err.code)) {
       return;
     }
+
     err.status = 500;
     throw err;
   }
@@ -55,12 +34,13 @@ async function send(ctx, path, opts) {
   if (stats.isDirectory()) {
     if (format && index) {
       path += '/' + index;
-      stats = await stat(path);
+      stats = await fs.promises.stat(path);
     } else {
       return;
     }
   }
 
+  // eslint-disable-next-line no-bitwise,unicorn/prefer-math-trunc
   ctx.set('Cache-Control', 'max-age=' + ((maxage / 1000) | 0));
 
   // Check if we can return a cache hit
@@ -81,7 +61,8 @@ async function send(ctx, path, opts) {
   // Stream
   ctx.set('Last-Modified', stats.mtime.toUTCString());
   ctx.set('Content-Length', stats.size);
-  ctx.type = extname(path);
+
+  if (!ctx.type) ctx.type = mime.contentType(extname(path));
   ctx.body = fs.createReadStream(path);
 
   return path;

@@ -1,4 +1,4 @@
-const { normalize, resolve, parse, sep } = require('path');
+const { normalize, resolve, parse, sep } = require('node:path');
 const resolvePath = require('resolve-path');
 const debug = require('debug')('@ladjs/koa-better-static');
 const send = require('./send');
@@ -35,17 +35,17 @@ function serve(root, opts = {}) {
   // Options
   debug('static "%s" %j', root, opts);
 
-  return async function(ctx, next) {
+  return async function (ctx, next) {
     if (ctx.method === 'HEAD' || ctx.method === 'GET') {
-      let path = ctx.path.substr(parse(ctx.path).root.length);
+      let path = ctx.path.slice(parse(ctx.path).root.length);
       try {
         path = decodeURIComponent(path);
-      } catch (err) {
+      } catch {
         ctx.throw('Could not decode path', 400);
         return;
       }
 
-      if (options.index && ctx.path[ctx.path.length - 1] === '/') {
+      if (options.index && ctx.path.at(-1) === '/') {
         path += options.index;
       }
 
@@ -59,17 +59,21 @@ function serve(root, opts = {}) {
         return;
       }
     }
+
     return next();
   };
 }
 
-// TODO: this can be sped up, with an findIndexOf loop
 function isHidden(root, path) {
-  path = path.substr(root.length).split(sep);
+  path = path.slice(root.length).split(sep);
+  // optimized with `findIndex`
+  /*
   for (let i = 0; i < path.length; i++) {
     if (path[i][0] === '.') {
       return true;
     }
   }
   return false;
+  */
+  return path.findIndex((segment) => segment[0] === '.') !== -1;
 }

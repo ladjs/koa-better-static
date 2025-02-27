@@ -1,7 +1,6 @@
 # [**@ladjs/koa-better-static**](https://github.com/ladjs/koa-better-static)
 
-[![build status](https://img.shields.io/travis/ladjs/koa-better-static.svg)](https://travis-ci.com/ladjs/koa-better-static)
-[![code coverage](https://img.shields.io/codecov/c/github/ladjs/koa-better-static.svg)](https://codecov.io/gh/ladjs/koa-better-static)
+[![build status](https://github.com/ladjs/koa-better-static/actions/workflows/ci.yml/badge.svg)](https://github.com/ladjs/koa-better-static/actions/workflows/ci.yml)
 [![code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![made with lass](https://img.shields.io/badge/made_with-lass-95CC28.svg)](https://lass.js.org)
@@ -30,6 +29,8 @@ Our package `@ladjs/koa-better-static` is a high-performance, drop-in replacemen
 * Removal of `gzip` option (which checks for .gz files)
 * Removal of `defer` (if you want this behavior, put the middleware at the end)
 * No default `index` file
+* Faster performance with `findIndex` hidden file lookup
+* Properly sets `Content-Type` header using `mime-types`
 
 
 ## Install
@@ -38,12 +39,6 @@ Our package `@ladjs/koa-better-static` is a high-performance, drop-in replacemen
 
 ```sh
 npm install @ladjs/koa-better-static
-```
-
-[yarn][]:
-
-```sh
-yarn add @ladjs/koa-better-static
 ```
 
 
@@ -92,8 +87,6 @@ app.listen(3000, () => {
 [MIT](LICENSE) © [Nick Baugh](http://niftylettuce.com/)
 
 
-## 
+##
 
 [npm]: https://www.npmjs.com/
-
-[yarn]: https://yarnpkg.com/

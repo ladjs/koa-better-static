@@ -1,3 +1,4 @@
+const http = require('node:http');
 const request = require('supertest');
 const test = require('ava');
 const Koa = require('koa');
@@ -198,4 +199,83 @@ test('dates should truncate not round, should mount fine', (t) => {
 
   const nd = new Date(ms);
   t.is(nd.toUTCString(), str);
+});
+
+// non-canonical paths must not be normalized and served, otherwise they
+// bypass upstream path-based guards that check `ctx.path`
+// (supertest normalizes URLs, so raw requests are sent with `http.get`)
+function rawGet(server, path) {
+  return new Promise((resolve, reject) => {
+    http
+      .get({ host: '127.0.0.1', port: server.address().port, path }, (res) => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+        });
+        res.on('end', () => resolve({ status: res.statusCode, body }));
+      })
+      .on('error', reject);
+  });
+}
+
+function guardedServer() {
+  const app = new Koa();
+  app.use((ctx, next) => {
+    if (ctx.path === '/hello.txt' || ctx.path.startsWith('/world/')) {
+      ctx.status = 403;
+      ctx.body = 'denied';
+      return;
+    }
+
+    return next();
+  });
+  app.use(serve('test/fixtures', { index: 'index.html' }));
+  return app.listen(0);
+}
+
+test('should still enforce guards on canonical paths', async (t) => {
+  const server = guardedServer();
+  for (const path of ['/hello.txt', '/world/index.html', '/world/']) {
+    // eslint-disable-next-line no-await-in-loop
+    const res = await rawGet(server, path);
+    t.is(res.status, 403);
+  }
+
+  server.close();
+});
+
+for (const path of [
+  '/foo/../hello.txt',
+  '/./hello.txt',
+  '/%2e/hello.txt',
+  '/foo/%2e%2e/hello.txt',
+  '/foo/%2E%2E/hello.txt',
+  '/foo%2f..%2fhello.txt',
+  '/%68ello.txt',
+  '/hello%2Etxt',
+  '/world/../hello.txt',
+  '/world%2findex.html',
+  '/world%5cindex.html',
+  '/world\\index.html',
+  '/world//index.html',
+  '/foo/../world/'
+]) {
+  test(`should not serve non-canonical path ${path}`, async (t) => {
+    const server = guardedServer();
+    const res = await rawGet(server, path);
+    t.not(res.status, 200);
+    t.false(res.body.includes('world'));
+    server.close();
+  });
+}
+
+test('should serve canonical paths with encoded reserved characters', async (t) => {
+  const server = guardedServer();
+  const res = await rawGet(server, '/space%20file.txt');
+  t.is(res.status, 200);
+  t.is(res.body, 'space');
+  const index = await rawGet(server, '/index.txt');
+  t.is(index.body, 'text index');
+  server.close();
 });
